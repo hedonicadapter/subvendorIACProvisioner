@@ -1,20 +1,24 @@
 import azure.functions as func
-import datetime
-import json
 import logging
-import traceback
 
-app = func.FunctionApp()
+from git import Repo
 
-@app.function_name(name="httpTrigger")
-@app.route(route="createSubscription", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
+
+# validate request data with openapi and apim
+
+# clone IAC repo
+# repo_url = "https://github.com/hedonicadapter/terraform-modules.git"
+# repo = Repo.clone_from(repo_url, "./IAC")
+
+# run terraform init && terraform plan
+# from python_terraform import *
+# tf = Terraform(working_dir='./IAC', variables={'a':'b', 'c':'d'})
+# tf.apply()
+
+@app.route(route="createSubscription")
 def createSubscription(req: func.HttpRequest) -> func.HttpResponse:
-    try:
-        print(req.headers.get('Api-Version'))
-    except ValueError as e:
-        return func.HttpResponse(f"Invalid JSON: {str(e)}", status_code=400)
-
     return func.HttpResponse(
-        status_code=200,
+         "This HTTP triggered function executed successfully.",
+         status_code=200
     )
-
