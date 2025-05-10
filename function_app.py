@@ -7,19 +7,26 @@ from python_terraform import *
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
+def cloneIACRepo():
+    repo_url = "https://github.com/hedonicadapter/terraform-modules.git"
+    logging.info(f"Cloning repository from {repo_url}.")
+
+    repo = Repo.clone_from(repo_url, "/tmp/IAC")
+    logging.info(f"Repository cloned successfully: {repo}.")
+
+def initializeDirectory():
+    logging.info("Removing existing IAC directory.")
+    _ = subprocess.run(["rm", "-rf", "/tmp/IAC"])
+
+    logging.info("Upserting tmp IAC directory")
+    os.makedirs("/tmp/IAC", exist_ok=True)
+
 @app.route(route="createSubscription")
 def createSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("createSubscription function triggered.")
     try:
-        logging.info("Removing existing IAC directory.")
-        subprocess.run(["rm", "-rf", "/tmp/IAC"])
-        os.makedirs("/tmp/IAC", exist_ok=True)
-
-        repo_url = "https://github.com/hedonicadapter/terraform-modules.git"
-        logging.info(f"Cloning repository from {repo_url}.")
-
-        repo = Repo.clone_from(repo_url, "/tmp/IAC")
-        logging.info(f"Repository cloned successfully: {repo}.")
+        initializeDirectory()
+        cloneIACRepo()
 
         return func.HttpResponse(
             "This HTTP triggered function executed successfully.",
