@@ -7,6 +7,11 @@ from python_terraform import *
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
+# 1. validate request data with openapi and apim
+def validateRequest(req: func.HttpRequest):
+   raise NotImplementedError("not implemented")
+
+# 2. clone repo
 def cloneIACRepo():
     repo_url = "https://github.com/hedonicadapter/terraform-modules.git"
     logging.info(f"Cloning repository from {repo_url}.")
@@ -21,12 +26,25 @@ def initializeDirectory():
     logging.info("Upserting tmp IAC directory")
     os.makedirs("/tmp/IAC", exist_ok=True)
 
+# 3. provision IAC
+def terraformPlan():
+    raise NotImplementedError("Terraform plan not implemented")
+
+def terraformApply():
+    # tf = Terraform(working_dir='./IAC', variables={'a':'b', 'c':'d'})
+    # tf.apply()
+    raise NotImplementedError("Terraform plan not implemented")
+
+
 @app.route(route="createSubscription")
 def createSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("createSubscription function triggered.")
     try:
+        # validateRequest(req)
         initializeDirectory()
         cloneIACRepo()
+        # terraformPlan()
+        # terraformApply()
 
         return func.HttpResponse(
             "This HTTP triggered function executed successfully.",
