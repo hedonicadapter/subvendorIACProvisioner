@@ -2,6 +2,7 @@ import azure.functions as func
 import logging
 
 from git import Repo
+from python_terraform import *
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -12,7 +13,6 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 # repo = Repo.clone_from(repo_url, "./IAC")
 
 # run terraform init && terraform plan
-# from python_terraform import *
 # tf = Terraform(working_dir='./IAC', variables={'a':'b', 'c':'d'})
 # tf.apply()
 
