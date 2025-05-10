@@ -1,6 +1,7 @@
 import azure.functions as func
 import subprocess
 import logging
+import os
 from git import Repo
 from python_terraform import *
 
@@ -12,6 +13,7 @@ def createSubscription(req: func.HttpRequest) -> func.HttpResponse:
     try:
         logging.info("Removing existing IAC directory.")
         subprocess.run(["rm", "-rf", "/tmp/IAC"])
+        os.makedirs("/tmp/IAC", exist_ok=True)
 
         repo_url = "https://github.com/hedonicadapter/terraform-modules.git"
         logging.info(f"Cloning repository from {repo_url}.")
