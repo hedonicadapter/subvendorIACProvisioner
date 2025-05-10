@@ -1,7 +1,7 @@
 import azure.functions as func
 import logging
 
-# from git import Repo
+from git import Repo
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
