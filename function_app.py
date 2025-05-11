@@ -40,9 +40,9 @@ def terraformApply():
     tf.apply()
 
 
-@app.route(route="createSubscription")
-def createSubscription(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("createSubscription function triggered.")
+@app.route(route="requestSubscription")
+def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("requestSubscription function triggered.")
     try:
         # validateRequest(req)
         initializeDirectory()
