@@ -17,31 +17,31 @@ iacDir = "/tmp/IAC"
 tf = Terraform(working_dir=iacDir)
 
 # 1. validate request with openapi
-def validateRequest(req: func.HttpRequest):
-    version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
-
-    spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
-    response = requests.get(spec_url)
-    if response.status_code != 200:
-        raise ValueError(f"Failed to fetch API spec: {response.status_code}")
-    spec_dict = response.json()
-
-    validate_spec(spec_dict)
-
-    spec = create_spec(spec_dict)
-
-    # Convert Azure req to RequestsOpenAPIRequest
-    openapi_request = RequestsOpenAPIRequest(requests.Request(
-        method=req.method,
-        url=req.url,
-        headers=dict(req.headers),
-        params=dict(req.params),
-        data=req.get_body()
-    ))
-
-    result = RequestValidator(spec).validate(openapi_request)
-
-    result.raise_for_errors()
+# def validateRequest(req: func.HttpRequest):
+#     version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
+#
+#     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
+#     response = requests.get(spec_url)
+#     if response.status_code != 200:
+#         raise ValueError(f"Failed to fetch API spec: {response.status_code}")
+#     spec_dict = response.json()
+#
+#     validate_spec(spec_dict)
+#
+#     spec = create_spec(spec_dict)
+#
+#     # Convert Azure req to RequestsOpenAPIRequest
+#     openapi_request = RequestsOpenAPIRequest(requests.Request(
+#         method=req.method,
+#         url=req.url,
+#         headers=dict(req.headers),
+#         params=dict(req.params),
+#         data=req.get_body()
+#     ))
+#
+#     result = RequestValidator(spec).validate(openapi_request)
+#
+#     result.raise_for_errors()
 
 # 2. clone repo
 def cloneIACRepo():
