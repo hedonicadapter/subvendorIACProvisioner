@@ -22,7 +22,7 @@ class RequestBody:
 # 1. validate request data with openapi
 def validateRequest(req: func.HttpRequest):
     version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest" if route param is optional
-    path = urlparse(req.url).path
+    path = urlparse(req.url).path.removeprefix("/api").removesuffix("/"+version)
     data = req.get_json()
 
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
@@ -33,7 +33,9 @@ def validateRequest(req: func.HttpRequest):
     spec_dict = response.json()
     req_body = RootRequestBody.from_dict(spec_dict)
 
-    # for k, v in req_body.paths.items():
+    for k, v in req_body.paths.items():
+        if k == path:
+            validate(data, v.post.requestBody.content.application_json.schema)
         
     return func.HttpResponse(
         f"This HTTP bungus function executed successfully. {path} {req_body.paths}",
