@@ -36,7 +36,7 @@ def validateRequest(req: func.HttpRequest):
         spec_dict = response.json()
 
         return func.HttpResponse(
-            f"This HTTP triggered function executed successfully. {path} {spec_dict}",
+            f"This HTTP bungus function executed successfully. {spec_dict}",
             status_code=200
         )
     
@@ -80,7 +80,7 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         path = urlparse(req.url).path
 
         return func.HttpResponse(
-            f"This HTTP triggered function executed successfully. {path}",
+            f"This HTTP chungus function executed successfully. {path}",
             status_code=200
         )
     except subprocess.CalledProcessError as e:
