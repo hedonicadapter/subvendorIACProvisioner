@@ -28,13 +28,15 @@ def validateRequest(req: func.HttpRequest):
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
     response = requests.get(spec_url)
     if response.status_code != 200:
-        return func.HttpResponse(f"Failed to fetch API spec from {spec_url}: {response.status_code}", status_code=400)
+        return func.HttpResponse(f"Failed to fetch API spec from {spec_url}: {response.status_code}", status_code=500)
 
     spec_dict = response.json()
     req_body = RootRequestBody.from_dict(spec_dict)
 
+    # for k, v in req_body.paths.items():
+        
     return func.HttpResponse(
-        f"This HTTP bungus function executed successfully. {req_body.paths}",
+        f"This HTTP bungus function executed successfully. {path} {req_body.paths}",
         status_code=200
     )
     
