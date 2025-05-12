@@ -5,5 +5,4 @@
 azure-functions
 python-terraform
 GitPython
-openapi-core
-requests
+openapi-schema-validator

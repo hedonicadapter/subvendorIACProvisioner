@@ -4,6 +4,7 @@ import logging
 import os
 from git import Repo
 from python_terraform import *
+from openapi_schema_validator import validate
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -47,8 +48,8 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         version = req.route_params.get("version")
         print(version)
         # validateRequest(req)
-        initializeDirectory()
-        cloneIACRepo()
+        # initializeDirectory()
+        # cloneIACRepo()
         # terraformInit()
         # terraformPlan()
         # terraformApply()
