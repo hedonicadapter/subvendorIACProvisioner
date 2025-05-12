@@ -6,6 +6,7 @@ from git import Repo
 from python_terraform import *
 from openapi_schema_validator import validate
 from dataclasses import dataclass
+from urllib.parse import urlparse
 import requests
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
@@ -35,32 +36,10 @@ def validateRequest(req: func.HttpRequest):
         spec_dict = response.json()
 
         return func.HttpResponse(
-            f"This HTTP triggered function executed successfully. {spec_dict}",
+            f"This HTTP triggered function executed successfully. {path} {spec_dict}",
             status_code=200
         )
     
-#     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
-#     response = requests.get(spec_url)
-#     if response.status_code != 200:
-#         raise ValueError(f"Failed to fetch API spec: {response.status_code}")
-#     spec_dict = response.json()
-#
-#     validate_spec(spec_dict)
-#
-#     spec = create_spec(spec_dict)
-#
-#     # Convert Azure req to RequestsOpenAPIRequest
-#     openapi_request = RequestsOpenAPIRequest(requests.Request(
-#         method=req.method,
-#         url=req.url,
-#         headers=dict(req.headers),
-#         params=dict(req.params),
-#         data=req.get_body()
-#     ))
-#
-#     result = RequestValidator(spec).validate(openapi_request)
-#
-#     result.raise_for_errors()
 # 2. clone repo
 def cloneIACRepo():
     repo_url = "https://github.com/hedonicadapter/terraform-modules.git"
@@ -98,8 +77,10 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         # terraformPlan()
         # terraformApply()
 
+        path = urlparse(req.url).path
+
         return func.HttpResponse(
-            "This HTTP triggered function executed successfully.",
+            f"This HTTP triggered function executed successfully. {path}",
             status_code=200
         )
     except subprocess.CalledProcessError as e:
