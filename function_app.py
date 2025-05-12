@@ -3,6 +3,7 @@ import subprocess
 import logging
 import os
 from git import Repo
+from models.stgAcc import RootRequestBody
 from python_terraform import *
 from openapi_schema_validator import validate
 from dataclasses import dataclass
@@ -23,7 +24,12 @@ def validateRequest(req: func.HttpRequest):
     try:
         version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
         data = req.get_json()
-        req_body = RequestBody(**data)
+        req_body = RootRequestBody.from_dict(data)
+
+        return func.HttpResponse(
+            f"This HTTP body function executed successfully. {req_body.paths}",
+            status_code=200
+        )
     except ValueError as e:
         return func.HttpResponse(f"Invalid JSON: {str(e)}", status_code=400)
     except TypeError as e:
