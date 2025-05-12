@@ -1,49 +1,18 @@
 import azure.functions as func
-import requests
 import subprocess
 import logging
 import os
 from git import Repo
 from python_terraform import *
-from openapi_core import create_spec
-from openapi_core.validation.request.validators import RequestValidator
-from openapi_core.contrib.requests import RequestsOpenAPIRequest
-from openapi_spec_validator import validate_spec
-import json
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 iacDir = "/tmp/IAC"
 tf = Terraform(working_dir=iacDir)
 
-# 1. validate request with openapi
-# def validateRequest(req: func.HttpRequest):
-#     version = req.route_params.get('version')
-#     if not version:
-#         raise ValueError("Version is missing in route parameters.")
-#
-#     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
-#     response = requests.get(spec_url)
-#     if response.status_code != 200:
-#         raise ValueError(f"Failed to fetch API spec: {response.status_code}")
-#     spec_dict = response.json()
-#
-#     validate_spec(spec_dict)
-#
-#     spec = create_spec(spec_dict)
-#
-#     # Convert Azure req to RequestsOpenAPIRequest
-#     openapi_request = RequestsOpenAPIRequest(requests.Request(
-#         method=req.method,
-#         url=req.url,
-#         headers=dict(req.headers),
-#         params=dict(req.params),
-#         data=req.get_body()
-#     ))
-#
-#     result = RequestValidator(spec).validate(openapi_request)
-#
-#     result.raise_for_errors()
+# 1. validate request data with openapi and apim
+def validateRequest(req: func.HttpRequest):
+   raise NotImplementedError("not implemented")
 
 # 2. clone repo
 def cloneIACRepo():
@@ -71,13 +40,13 @@ def terraformApply():
     tf.apply()
 
 
-@app.route(route="requestSubscription", methods=[func.HttpMethod.POST])
+@app.route(route="requestSubscription")
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
         # validateRequest(req)
-        # initializeDirectory()
-        # cloneIACRepo()
+        initializeDirectory()
+        cloneIACRepo()
         # terraformInit()
         # terraformPlan()
         # terraformApply()
