@@ -71,11 +71,11 @@ def terraformApply():
     tf.apply()
 
 
-@app.route(route="requestSubscription", methods=[func.HttpMethod.POST])
+@app.route(route="requestSubscription")
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
-        validateRequest(req)
+        # validateRequest(req)
         initializeDirectory()
         cloneIACRepo()
         # terraformInit()
