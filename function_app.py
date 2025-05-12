@@ -35,6 +35,10 @@ def validateRequest(req: func.HttpRequest):
         spec_dict = response.json()
 
         logging.info(spec_dict)
+        return func.HttpResponse(
+            f"This HTTP triggered function executed successfully. {spec_dict}",
+            status_code=200
+        )
     
 #     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
 #     response = requests.get(spec_url)
