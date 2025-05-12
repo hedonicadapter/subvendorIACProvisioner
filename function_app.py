@@ -28,7 +28,7 @@ def validateRequest(req: func.HttpRequest):
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
     response = requests.get(spec_url)
     if response.status_code != 200:
-        return func.HttpResponse(f"Failed to fetch API spec: {response.status_code}", status_code=400)
+        return func.HttpResponse(f"Failed to fetch API spec from {spec_url}: {response.status_code}", status_code=400)
 
     spec_dict = response.json()
     req_body = RootRequestBody.from_dict(spec_dict)
