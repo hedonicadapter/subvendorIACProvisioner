@@ -21,30 +21,22 @@ class RequestBody:
 
 # 1. validate request data with openapi
 def validateRequest(req: func.HttpRequest):
-    try:
-        version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
-        data = req.get_json()
-        req_body = RootRequestBody.from_dict(data)
+    version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest" if route param is optional
+    path = urlparse(req.url).path
+    data = req.get_json()
 
-        return func.HttpResponse(
-            f"This HTTP body function executed successfully. {req_body.paths}",
-            status_code=200
-        )
-    except ValueError as e:
-        return func.HttpResponse(f"Invalid JSON: {str(e)}", status_code=400)
-    except TypeError as e:
-        return func.HttpResponse(f"Missing required field: {str(e)}", status_code=400)
-    else:
-        spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
-        response = requests.get(spec_url)
-        if response.status_code != 200:
-            return func.HttpResponse(f"Failed to fetch API spec: {response.status_code}", status_code=400)
-        spec_dict = response.json()
+    spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
+    response = requests.get(spec_url)
+    if response.status_code != 200:
+        return func.HttpResponse(f"Failed to fetch API spec: {response.status_code}", status_code=400)
 
-        return func.HttpResponse(
-            f"This HTTP bungus function executed successfully. {spec_dict}",
-            status_code=200
-        )
+    spec_dict = response.json()
+    req_body = RootRequestBody.from_dict(spec_dict)
+
+    return func.HttpResponse(
+        f"This HTTP bungus function executed successfully. {req_body.paths}",
+        status_code=200
+    )
     
 # 2. clone repo
 def cloneIACRepo():
@@ -85,10 +77,8 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         # terraformPlan()
         # terraformApply()
 
-        path = urlparse(req.url).path
-
         return func.HttpResponse(
-            f"This HTTP chungus function executed successfully. {path}",
+            f"This HTTP chungus function executed successfully. ",
             status_code=200
         )
     except subprocess.CalledProcessError as e:
