@@ -40,7 +40,7 @@ def terraformApply():
     tf.apply()
 
 
-@app.route(route="requestSubscription")
+@app.route(route="requestSubscription/{version}")
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
