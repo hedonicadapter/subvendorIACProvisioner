@@ -44,6 +44,8 @@ def terraformApply():
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
+        version = req.route_params.get("version")
+        print(version)
         # validateRequest(req)
         initializeDirectory()
         cloneIACRepo()
