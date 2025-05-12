@@ -71,10 +71,12 @@ def terraformApply():
     tf.apply()
 
 
-@app.route(route="requestSubscription", methods=[func.HttpMethod.POST])
+@app.route(route="requestSubscription/{version:alpha}", methods=[func.HttpMethod.POST])
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
+        version = req.route_params.get('version')
+        print(version)
         # validateRequest(req)
         initializeDirectory()
         cloneIACRepo()
