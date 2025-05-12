@@ -70,9 +70,9 @@ def terraformPlan():
 def terraformApply():
     tf.apply()
 
-@app.function_name(name="httpTrigger")
-@app.route(route="requestSubscription/{version}", methods=[func.HttpMethod.POST])
-def main(req: func.HttpRequest) -> func.HttpResponse:
+
+@app.route(route="requestSubscription/{version:alpha}")
+def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
         version = req.route_params.get('version')
