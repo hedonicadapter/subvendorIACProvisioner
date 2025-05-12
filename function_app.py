@@ -71,13 +71,10 @@ def terraformApply():
     tf.apply()
 
 
-@app.function_name(name="httpTrigger")
-@app.route(route="products/{category:alpha}/{id:int?}")
-def main(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="requestSubscription", methods=[func.HttpMethod.POST])
+def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
-        category = req.route_params.get('category')
-        print(category)
         # validateRequest(req)
         initializeDirectory()
         cloneIACRepo()
