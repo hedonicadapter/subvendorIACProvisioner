@@ -23,7 +23,7 @@ class RequestBody:
 def validateRequest(req: func.HttpRequest):
     try:
         version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
-        data = req.get_json()
+        data = req.get_body()
         # req_body = RootRequestBody.from_dict(data)
 
         return func.HttpResponse(
