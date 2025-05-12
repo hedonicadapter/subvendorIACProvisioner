@@ -68,7 +68,7 @@ def terraformPlan():
 def terraformApply():
     tf.apply()
 
-@app.route(route="requestSubscription/{version:alpha?}", methods=[func.HttpMethod.POST])
+@app.route(route="requestSubscription/{version}", methods=[func.HttpMethod.POST])
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
