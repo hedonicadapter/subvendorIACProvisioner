@@ -76,7 +76,9 @@ def terraformApply():
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
-        validateRequest(req)
+        validation_response = validateRequest(req)
+        if isinstance(validation_response, func.HttpResponse):
+            return validation_response
         # initializeDirectory()
         # cloneIACRepo()
         # terraformInit()
