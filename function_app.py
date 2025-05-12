@@ -20,6 +20,7 @@ class RequestBody:
     contents: dict[str, str]
 
 # 1. validate request data with openapi
+# TODO: error handling
 def validateRequest(req: func.HttpRequest):
     version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest" if route param is optional
     path = urlparse(req.url).path.removeprefix("/api").removesuffix("/"+version)
@@ -36,11 +37,6 @@ def validateRequest(req: func.HttpRequest):
     for k, v in req_body.paths.items():
         if k == path:
             validate(data, v.post.requestBody.content.application_json.schema)
-        
-    return func.HttpResponse(
-        f"This HTTP bungus function executed successfully. {path} {req_body.paths}",
-        status_code=200
-    )
     
 # 2. clone repo
 def cloneIACRepo():
