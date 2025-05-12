@@ -6,6 +6,7 @@ from git import Repo
 from python_terraform import *
 from openapi_schema_validator import validate
 from dataclasses import dataclass
+import requests
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -16,7 +17,7 @@ tf = Terraform(working_dir=iacDir)
 class RequestBody:
     contents: dict[str, str]
 
-# 1. validate request data with openapi and apim
+# 1. validate request data with openapi
 def validateRequest(req: func.HttpRequest):
     try:
         version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
@@ -26,19 +27,15 @@ def validateRequest(req: func.HttpRequest):
         return func.HttpResponse(f"Invalid JSON: {str(e)}", status_code=400)
     except TypeError as e:
         return func.HttpResponse(f"Missing required field: {str(e)}", status_code=400)
+    else:
+        spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
+        response = requests.get(spec_url)
+        if response.status_code != 200:
+            raise ValueError(f"Failed to fetch API spec: {response.status_code}")
+        spec_dict = response.json()
 
-    version = req.route_params.get("version")
-    print(version)
-
-    body = req.get_json()
-    logging.info(body)
-
-    body.get("schema")
+        logging.info(spec_dict)
     
-# 1. validate request with openapi
-# def validateRequest(req: func.HttpRequest):
-#     version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
-#
 #     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
 #     response = requests.get(spec_url)
 #     if response.status_code != 200:
