@@ -5,16 +5,62 @@ import os
 from git import Repo
 from python_terraform import *
 from openapi_schema_validator import validate
+from dataclasses import dataclass
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 iacDir = "/tmp/IAC"
 tf = Terraform(working_dir=iacDir)
 
+@dataclass
+class RequestBody:
+    contents: dict[str, str]
+
 # 1. validate request data with openapi and apim
 def validateRequest(req: func.HttpRequest):
-   raise NotImplementedError("not implemented")
+    try:
+        version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
+        data = req.get_json()
+        req_body = RequestBody(**data)
+    except ValueError as e:
+        return func.HttpResponse(f"Invalid JSON: {str(e)}", status_code=400)
+    except TypeError as e:
+        return func.HttpResponse(f"Missing required field: {str(e)}", status_code=400)
 
+    version = req.route_params.get("version")
+    print(version)
+
+    body = req.get_json()
+    logging.info(body)
+
+    body.get("schema")
+    
+# 1. validate request with openapi
+# def validateRequest(req: func.HttpRequest):
+#     version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
+#
+#     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
+#     response = requests.get(spec_url)
+#     if response.status_code != 200:
+#         raise ValueError(f"Failed to fetch API spec: {response.status_code}")
+#     spec_dict = response.json()
+#
+#     validate_spec(spec_dict)
+#
+#     spec = create_spec(spec_dict)
+#
+#     # Convert Azure req to RequestsOpenAPIRequest
+#     openapi_request = RequestsOpenAPIRequest(requests.Request(
+#         method=req.method,
+#         url=req.url,
+#         headers=dict(req.headers),
+#         params=dict(req.params),
+#         data=req.get_body()
+#     ))
+#
+#     result = RequestValidator(spec).validate(openapi_request)
+#
+#     result.raise_for_errors()
 # 2. clone repo
 def cloneIACRepo():
     repo_url = "https://github.com/hedonicadapter/terraform-modules.git"
@@ -45,9 +91,7 @@ def terraformApply():
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
-        version = req.route_params.get("version")
-        print(version)
-        # validateRequest(req)
+        validateRequest(req)
         # initializeDirectory()
         # cloneIACRepo()
         # terraformInit()
