@@ -16,11 +16,9 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 iacDir = "/tmp/IAC"
 tf = Terraform(working_dir=iacDir)
 
-# 1. validate request data with openapi and apim
+# 1. validate request with openapi
 def validateRequest(req: func.HttpRequest):
-    version = req.route_params.get('version')
-    if not version:
-        raise ValueError("Version is missing in route parameters.")
+    version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest"
 
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
     response = requests.get(spec_url)
@@ -71,13 +69,13 @@ def terraformApply():
     tf.apply()
 
 
-@app.route(route="requestSubscription", methods=[func.HttpMethod.POST])
+@app.route(route="requestSubscription/{version:string?}", methods=[func.HttpMethod.POST])
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
-        # validateRequest(req)
-        initializeDirectory()
-        cloneIACRepo()
+        validateRequest(req)
+        # initializeDirectory()
+        # cloneIACRepo()
         # terraformInit()
         # terraformPlan()
         # terraformApply()
