@@ -27,8 +27,15 @@ def getAPISchema(version: str):
 
 # 1. validate request with API schema
 def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
+    logging.info(schema.paths.items())
+
     for k, v in schema.paths.items():
+        logging.info(k, path, k==path)
         if k == path:
+            logging.info("k == path true")
+            logging.info(v.post.requestBody.content.application_json.schema)
+            logging.info(validate(req_data, v.post.requestBody.content.application_json.schema))
+
             raise APIValidationError(v.post.requestBody.content.application_json.schema, status_code=500)
             return validate(req_data, v.post.requestBody.content.application_json.schema)
 
@@ -70,8 +77,8 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         schema = getAPISchema(version)
 
         validateRequest(path, req_data, schema)
-        initializeDirectory()
-        cloneIACRepo()
+        # initializeDirectory()
+        # cloneIACRepo()
         # terraformInit()
         # terraformPlan()
         # terraformApply()
