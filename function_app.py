@@ -34,6 +34,7 @@ def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
         if k == path:
             logging.info("k == path true")
             logging.info(v.post.requestBody.content.application_json.schema)
+            logging.info(req_data)
             logging.info(validate(req_data, v.post.requestBody.content.application_json.schema))
 
             return validate(req_data, v.post.requestBody.content.application_json.schema)
