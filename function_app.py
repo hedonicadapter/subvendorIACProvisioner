@@ -7,7 +7,6 @@ from models.stgAcc import RootRequestBody
 from models.error import APIValidationError
 from python_terraform import *
 from openapi_schema_validator import validate
-from dataclasses import dataclass
 from urllib.parse import urlparse
 import requests
 
@@ -15,10 +14,6 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 iacDir = "/tmp/IAC"
 tf = Terraform(working_dir=iacDir)
-
-@dataclass
-class RequestBody:
-    contents: dict[str, str]
 
 def getAPISchema(version: str):
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
@@ -34,6 +29,7 @@ def getAPISchema(version: str):
 def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
     for k, v in schema.paths.items():
         if k == path:
+            raise APIValidationError(v.post.requestBody.content.application_json.schema, status_code=500)
             return validate(req_data, v.post.requestBody.content.application_json.schema)
 
     raise APIValidationError("Schema validation failed.", status_code=500)
@@ -81,7 +77,7 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         # terraformApply()
 
         return func.HttpResponse(
-            f"This HTTP chungus function executed successfully. ",
+            f"This HTTP chungus function executed successfully. {req_data}",
             status_code=200
         )
     except APIValidationError as e:
