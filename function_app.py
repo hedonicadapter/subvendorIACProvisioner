@@ -27,10 +27,10 @@ def getAPISchema(version: str):
 
 # 1. validate request with API schema
 def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
-    logging.info(schema.paths.items())
+    logging.info(f"Schema paths: {list(schema.paths.keys())}")
 
     for k, v in schema.paths.items():
-        logging.info(k, path, k==path)
+        logging.info(f"key = {k}, requested path = {path}, match = {k == path}")
         if k == path:
             logging.info("k == path true")
             logging.info(v.post.requestBody.content.application_json.schema)
