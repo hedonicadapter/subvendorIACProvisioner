@@ -36,7 +36,6 @@ def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
             logging.info(v.post.requestBody.content.application_json.schema)
             logging.info(validate(req_data, v.post.requestBody.content.application_json.schema))
 
-            raise APIValidationError(v.post.requestBody.content.application_json.schema, status_code=500)
             return validate(req_data, v.post.requestBody.content.application_json.schema)
 
     raise APIValidationError("Schema validation failed.", status_code=500)
