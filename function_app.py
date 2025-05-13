@@ -4,6 +4,7 @@ import logging
 import os
 from git import Repo
 from models.stgAcc import RootRequestBody
+from models.error import APIValidationError
 from python_terraform import *
 from openapi_schema_validator import validate
 from dataclasses import dataclass
@@ -19,24 +20,23 @@ tf = Terraform(working_dir=iacDir)
 class RequestBody:
     contents: dict[str, str]
 
-# 1. validate request data with openapi
-# TODO: error handling
-def validateRequest(req: func.HttpRequest):
-    version = req.route_params.get('version') or "versioning-not-implemented" # WARN: when versioning is implemented: or "latest" if route param is optional
-    path = urlparse(req.url).path.removeprefix("/api").removesuffix("/"+version)
-    data = req.get_json()
-
+def getAPISchema(version: str):
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
+
     response = requests.get(spec_url)
     if response.status_code != 200:
-        return func.HttpResponse(f"Failed to fetch API spec from {spec_url}: {response.status_code}", status_code=500)
+        raise APIValidationError(f"Failed to fetch API spec from {spec_url}: {response.status_code}", status_code=500)
 
     spec_dict = response.json()
-    req_body = RootRequestBody.from_dict(spec_dict)
+    return RootRequestBody.from_dict(spec_dict)
 
-    for k, v in req_body.paths.items():
+# 1. validate request with API schema
+def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
+    for k, v in schema.paths.items():
         if k == path:
-            validate(data, v.post.requestBody.content.application_json.schema)
+            return validate(req_data, v.post.requestBody.content.application_json.schema)
+
+    raise APIValidationError("Schema validation failed.", status_code=500)
     
 # 2. clone repo
 def cloneIACRepo():
@@ -68,11 +68,14 @@ def terraformApply():
 def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("requestSubscription function triggered.")
     try:
-        validation_response = validateRequest(req)
-        if isinstance(validation_response, func.HttpResponse):
-            return validation_response
-        # initializeDirectory()
-        # cloneIACRepo()
+        version = req.route_params.get('version') or "versioning-not-implemented"
+        path = urlparse(req.url).path.removeprefix("/api").removesuffix("/" + version)
+        req_data = req.get_json()
+        schema = getAPISchema(version)
+
+        validateRequest(path, req_data, schema)
+        initializeDirectory()
+        cloneIACRepo()
         # terraformInit()
         # terraformPlan()
         # terraformApply()
@@ -81,6 +84,8 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
             f"This HTTP chungus function executed successfully. ",
             status_code=200
         )
+    except APIValidationError as e:
+        return func.HttpResponse(e.message, status_code=e.status_code)
     except subprocess.CalledProcessError as e:
         logging.error(f"Subprocess error: {e}")
         return func.HttpResponse(
