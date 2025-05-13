@@ -13,6 +13,7 @@ import requests
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 iacDir = "/tmp/IAC"
+tf = Terraform(working_dir=iacDir)
 
 def getAPISchema(version: str):
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
@@ -49,7 +50,6 @@ def initializeDirectory():
 
 # 3. provision IAC
 def terraformInit():
-    tf = Terraform(working_dir=iacDir)
     tf.init()
 
 def terraformPlan():
