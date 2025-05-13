@@ -67,12 +67,13 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         path = urlparse(req.url).path.removeprefix("/api").removesuffix("/" + version)
         req_data = req.get_json()
         schema = getAPISchema(version)
+        logging.info(req_data)
 
         validateRequest(path, req_data, schema)
         initializeDirectory()
         cloneIACRepo()
-        # terraformInit()
-        # terraformPlan()
+        terraformInit()
+        terraformPlan()
         # terraformApply()
 
         return func.HttpResponse(
