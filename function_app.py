@@ -52,8 +52,8 @@ def initializeDirectory():
 def terraformInit():
     tf.init()
 
-def terraformPlan():
-    tf.plan()
+def terraformPlan(vars:dict[str, str]):
+    tf.plan(var=vars)
 
 def terraformApply():
     tf.apply()
@@ -65,15 +65,14 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     try:
         version = req.route_params.get('version') or "versioning-not-implemented"
         path = urlparse(req.url).path.removeprefix("/api").removesuffix("/" + version)
-        req_data = req.get_json()
+        req_data = req.get_json() # {'modules_subscription': {'location_short': 'eastus'}}
         schema = getAPISchema(version)
-        logging.info(req_data)
 
         validateRequest(path, req_data, schema)
         initializeDirectory()
         cloneIACRepo()
         terraformInit()
-        # terraformPlan()
+        terraformPlan(req_data)
         # terraformApply()
 
         return func.HttpResponse(
