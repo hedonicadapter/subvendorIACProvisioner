@@ -53,7 +53,7 @@ def terraformInit():
     tf.init()
 
 def terraformPlan(vars:dict[str, str]):
-    tf.plan(no_color=IsFlagged, var=vars)
+    tf.plan(no_color=IsFlagged, var=vars.get("modules_subscription"))
 
 def terraformApply():
     tf.apply()
