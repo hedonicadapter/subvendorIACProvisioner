@@ -5,6 +5,7 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
 
 RUN apt-get update && \
     apt-get install -y git && \
+    apt-get install -y unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
