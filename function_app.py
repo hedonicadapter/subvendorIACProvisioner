@@ -27,16 +27,8 @@ def getAPISchema(version: str):
 
 # 1. validate request with API schema
 def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
-    logging.info(f"Schema paths: {list(schema.paths.keys())}")
-
     for k, v in schema.paths.items():
-        logging.info(f"key = {k}, requested path = {path}, match = {k == path}")
         if k == path:
-            logging.info("k == path true")
-            logging.info(v.post.requestBody.content.application_json.schema)
-            logging.info(req_data)
-            logging.info(validate(req_data, v.post.requestBody.content.application_json.schema))
-
             return validate(req_data, v.post.requestBody.content.application_json.schema)
 
     raise APIValidationError("Schema validation failed.", status_code=500)
@@ -77,8 +69,8 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         schema = getAPISchema(version)
 
         validateRequest(path, req_data, schema)
-        # initializeDirectory()
-        # cloneIACRepo()
+        initializeDirectory()
+        cloneIACRepo()
         # terraformInit()
         # terraformPlan()
         # terraformApply()
