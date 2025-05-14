@@ -90,7 +90,7 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         initializeDirectory()
         cloneIACRepo()
         terraformInit()
-        terraformPlan(req_data)
+        terraformPlan(req_data.get("modules_subscription"))
         # terraformApply()
 
         return func.HttpResponse(
