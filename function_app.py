@@ -30,6 +30,13 @@ def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
             return validate(req_data, v.post.requestBody.content.application_json.schema)
 
     raise APIValidationError("Schema validation failed.", status_code=500)
+
+def getEnv(req_data: dict):
+    env = os.environ.copy()
+
+    env["ARM_SUBSCRIPTION_ID"] = req_data.get("subscription_id", "")
+
+    return env
     
 # 2. clone repo
 def cloneIACRepo():
@@ -47,7 +54,7 @@ def initializeDirectory():
     os.makedirs(iacDir, exist_ok=True)
 
 # 3. provision IAC
-def run_terraform_command(command: list[str], cwd: str = iacDir, env: dict = None):
+def run_terraform_command(command: list[str], cwd: str = iacDir, env: dict | None = None):
     try:
         result = subprocess.run(
             command,
@@ -63,18 +70,18 @@ def run_terraform_command(command: list[str], cwd: str = iacDir, env: dict = Non
         logging.error(f"Command '{' '.join(command)}' failed:\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
         raise Exception(f"Terraform command failed: {e.stderr.strip()}")
 
-def terraformInit():
-    run_terraform_command(["terraform", "init"])
+def terraformInit(env: dict | None = None):
+    run_terraform_command(["terraform", "init"], env=env)
 
-def terraformPlan(vars: dict[str, str]):
+def terraformPlan(vars: dict[str, str], env: dict | None = None):
     tf_vars = [f"-var={key}={value}" for key, value in vars.items()]
-    run_terraform_command(["terraform", "plan", "-no-color"] + tf_vars)
+    run_terraform_command(["terraform", "plan", "-no-color"] + tf_vars, env=env)
 
-def terraformApply(auto_approve=True):
+def terraformApply(auto_approve=True, env: dict | None = None):
     command = ["terraform", "apply", "-no-color"]
     if auto_approve:
         command.append("-auto-approve")
-    run_terraform_command(command)
+    run_terraform_command(command, env=env)
 
 
 @app.route(route="requestSubscription/{version}")
@@ -83,15 +90,16 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     try:
         version = req.route_params.get('version') or "versioning-not-implemented"
         path = urlparse(req.url).path.removeprefix("/api").removesuffix("/" + version)
-        req_data = req.get_json() # {'variables': {'location_short': 'eastus'}}
         schema = getAPISchema(version)
+        req_data = req.get_json() # {'variables': {'location_short': 'eastus'}}
+        env = getEnv(req_data)
 
         validateRequest(path, req_data, schema)
         initializeDirectory()
         cloneIACRepo()
-        terraformInit()
-        terraformPlan(req_data.get("variables"))
-        # terraformApply()
+        terraformInit(env=env)
+        terraformPlan(req_data.get("variables"), env=env)
+        # terraformApply(req_data.get("variables"), env=env)
 
         return func.HttpResponse(
             f"This HTTP chungus function executed successfully. {req_data}",
