@@ -5,7 +5,6 @@ import os
 from git import Repo
 from models.stgAcc import RootRequestBody
 from models.error import APIValidationError
-from python_terraform import *
 from openapi_schema_validator import validate
 from urllib.parse import urlparse
 import requests
@@ -13,7 +12,6 @@ import requests
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 iacDir = "/tmp/IAC"
-tf = Terraform(working_dir=iacDir)
 
 def getAPISchema(version: str):
     spec_url = f"https://apigeneratoridiotms.blob.core.windows.net/api-gen/{version}.json"
@@ -49,23 +47,34 @@ def initializeDirectory():
     os.makedirs(iacDir, exist_ok=True)
 
 # 3. provision IAC
+def run_terraform_command(command: list[str], cwd: str = iacDir, env: dict = None):
+    try:
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            env=env,
+            check=True,
+            text=True,
+            capture_output=True
+        )
+        logging.info(f"Command '{' '.join(command)}' succeeded:\n{result.stdout}")
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Command '{' '.join(command)}' failed:\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
+        raise Exception(f"Terraform command failed: {e.stderr.strip()}")
+
 def terraformInit():
-    return_code, stdout, stderr = tf.init(capture_output=True)
-    if return_code != 0:
-        logging.error(f"Terraform init failed:\nSTDOUT: {stdout}\nSTDERR: {stderr}")
-        raise Exception(f"Terraform init failed: {stderr}")
+    run_terraform_command(["terraform", "init"])
 
 def terraformPlan(vars: dict[str, str]):
-    return_code, stdout, stderr = tf.plan(capture_output=True, no_color=IsFlagged, var=vars.get("modules_subscription"))
-    if return_code != 0:
-        logging.error(f"Terraform plan failed:\nSTDOUT: {stdout}\nSTDERR: {stderr}")
-        raise Exception(f"Terraform plan failed: {stderr}")
+    tf_vars = [f"-var={key}={value}" for key, value in vars.items()]
+    run_terraform_command(["terraform", "plan", "-no-color"] + tf_vars)
 
-def terraformApply():
-    return_code, stdout, stderr = tf.apply(capture_output=True)
-    if return_code != 0:
-        logging.error(f"Terraform apply failed:\nSTDOUT: {stdout}\nSTDERR: {stderr}")
-        raise Exception(f"Terraform apply failed: {stderr}")
+def terraformApply(auto_approve=True):
+    command = ["terraform", "apply", "-no-color"]
+    if auto_approve:
+        command.append("-auto-approve")
+    run_terraform_command(command)
 
 
 @app.route(route="requestSubscription/{version}")
