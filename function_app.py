@@ -34,16 +34,15 @@ def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
 def getEnv(req_data: dict):
     env = os.environ.copy()
 
-    env["ARM_USE_MSI"] = "true"
     env["ARM_TENANT_ID"]=req_data.get("tenant_id", "")
     env["ARM_SUBSCRIPTION_ID"] = req_data.get("subscription_id", "")
-    # env["ARM_CLIENT_ID"]= # only necessary for user assigned identity
 
     # predefined managed identity variable in azure function app
-    # WARN: pinned version, see https://github.com/hashicorp/terraform-provider-azurerm/issues/21616
-    env["ARM_MSI_ENDPOINT"] = os.environ.get("IDENTITY_ENDPOINT", "") + "?api-version=2019-08-01"
-
-    # env["ARM_MSI_SECRET"]="$IDENTITY_HEADER"
+    # WARN: doesnt work with azurerm, see https://github.com/hashicorp/terraform-provider-azurerm/issues/21616 and https://github.com/pulumi/pulumi-azuread/issues/1023
+    # env["ARM_USE_MSI"] = "true"
+    # env["ARM_MSI_ENDPOINT"] = os.environ.get("IDENTITY_ENDPOINT", "") 
+    # env["ARM_CLIENT_ID"]= # only necessary for user assigned identity
+    # env["ARM_MSI_SECRET"]="$IDENTITY_HEADER" # not necessary afaik
 
     return env
     
@@ -61,6 +60,9 @@ def initializeDirectory():
 
     logging.info("Upserting tmp IAC directory")
     os.makedirs(iacDir, exist_ok=True)
+
+def authenticatWithAzure():
+    subprocess.run(["az", "login", "--identity"])
 
 # 3. provision IAC
 def run_terraform_command(command: list[str], cwd: str = iacDir, env: dict | None = None):
@@ -106,6 +108,7 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
         validateRequest(path, req_data, schema)
         initializeDirectory()
         cloneIACRepo()
+        authenticatWithAzure()
         terraformInit(env=env)
         terraformPlan(req_data.get("variables"), env=env)
         # terraformApply(req_data.get("variables"), env=env)
