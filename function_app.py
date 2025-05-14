@@ -50,19 +50,19 @@ def initializeDirectory():
 
 # 3. provision IAC
 def terraformInit():
-    return_code, stdout, stderr = tf.init(capture_output=False)
+    return_code, stdout, stderr = tf.init(capture_output=True)
     if return_code != 0:
         logging.error(f"Terraform init failed:\nSTDOUT: {stdout}\nSTDERR: {stderr}")
         raise Exception(f"Terraform init failed: {stderr}")
 
 def terraformPlan(vars: dict[str, str]):
-    return_code, stdout, stderr = tf.plan(capture_output=False, no_color=IsFlagged, var=vars.get("modules_subscription"))
+    return_code, stdout, stderr = tf.plan(capture_output=True, no_color=IsFlagged, var=vars.get("modules_subscription"))
     if return_code != 0:
         logging.error(f"Terraform plan failed:\nSTDOUT: {stdout}\nSTDERR: {stderr}")
         raise Exception(f"Terraform plan failed: {stderr}")
 
 def terraformApply():
-    return_code, stdout, stderr = tf.apply(capture_output=False)
+    return_code, stdout, stderr = tf.apply(capture_output=True)
     if return_code != 0:
         logging.error(f"Terraform apply failed:\nSTDOUT: {stdout}\nSTDERR: {stderr}")
         raise Exception(f"Terraform apply failed: {stderr}")
