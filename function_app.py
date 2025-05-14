@@ -83,14 +83,14 @@ def requestSubscription(req: func.HttpRequest) -> func.HttpResponse:
     try:
         version = req.route_params.get('version') or "versioning-not-implemented"
         path = urlparse(req.url).path.removeprefix("/api").removesuffix("/" + version)
-        req_data = req.get_json() # {'modules_subscription': {'location_short': 'eastus'}}
+        req_data = req.get_json() # {'variables': {'location_short': 'eastus'}}
         schema = getAPISchema(version)
 
         validateRequest(path, req_data, schema)
         initializeDirectory()
         cloneIACRepo()
         terraformInit()
-        terraformPlan(req_data.get("modules_subscription"))
+        terraformPlan(req_data.get("variables"))
         # terraformApply()
 
         return func.HttpResponse(
