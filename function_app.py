@@ -38,7 +38,11 @@ def getEnv(req_data: dict):
     env["ARM_TENANT_ID"]=req_data.get("tenant_id", "")
     env["ARM_SUBSCRIPTION_ID"] = req_data.get("subscription_id", "")
     # env["ARM_CLIENT_ID"]= # only necessary for user assigned identity
-    env["ARM_MSI_ENDPOINT"] = os.environ.get("IDENTITY_ENDPOINT", "") # predefined managed identity variable in azure function app
+
+    # predefined managed identity variable in azure function app
+    # WARN: pinned version, see https://github.com/hashicorp/terraform-provider-azurerm/issues/21616
+    env["ARM_MSI_ENDPOINT"] = os.environ.get("IDENTITY_ENDPOINT", "") + "?api-version=2019-08-01"
+
     # env["ARM_MSI_SECRET"]="$IDENTITY_HEADER"
 
     return env
