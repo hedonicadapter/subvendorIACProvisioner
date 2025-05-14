@@ -34,7 +34,12 @@ def validateRequest(path:str, req_data:dict[str,str], schema:RootRequestBody):
 def getEnv(req_data: dict):
     env = os.environ.copy()
 
+    env["ARM_USE_MSI"] = "true"
+    env["ARM_TENANT_ID"]=req_data.get("tenant_id", "")
     env["ARM_SUBSCRIPTION_ID"] = req_data.get("subscription_id", "")
+    # env["ARM_CLIENT_ID"]= # only necessary for user assigned identity
+    env["ARM_MSI_ENDPOINT"] = os.environ.get("IDENTITY_ENDPOINT", "") # predefined managed identity variable in azure function app
+    # env["ARM_MSI_SECRET"]="$IDENTITY_HEADER"
 
     return env
     
